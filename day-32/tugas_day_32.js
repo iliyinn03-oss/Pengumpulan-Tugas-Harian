@@ -81,3 +81,50 @@ console.log(cekAngka(5));
 // Jika semua tebakan tepat, tebakan paling sulit adalah hasil undefined pada Potongan B,
 // karena mencetak sesuatu di dalam function tidak sama dengan mengembalikannya.
 
+// ============================
+// LANGKAH 2: PERBAIKI 7 ERROR
+// ============================
+
+let daftarBelanja = ["Kopi", "Teh", "Roti"];
+
+// FIX 1: push menambah "Susu" di akhir, bukan unshift di depan.
+daftarBelanja.push("Susu");
+
+// FIX 2: splice menghapus elemen dari array asli; slice hanya membuat irisan baru.
+daftarBelanja.splice(1, 1);
+
+// FIX 3: includes menghasilkan boolean untuk mengecek keberadaan "Roti".
+let adaRoti = daftarBelanja.includes("Roti");
+
+// FIX 4: indeks terakhir adalah panjang array dikurangi satu.
+let terakhir = daftarBelanja[daftarBelanja.length - 1];
+
+// FIX 5: return mengembalikan nilai hasil perhitungan diskon.
+function hitungDiskon(harga, persen) {
+  return harga - (harga * persen) / 100;
+}
+
+// FIX 6: return diperlukan agar hasil pajak dikembalikan oleh function.
+const hitungPajak = (subtotal) => {
+  return subtotal * 0.11;
+};
+
+// FIX 7: definisikan function expression sebelum dipanggil agar nilainya sudah tersedia.
+const hitungTotal = (subtotal, pajak) => subtotal + pajak;
+
+console.log(daftarBelanja, adaRoti, terakhir);
+console.log(hitungDiskon(100000, 20));
+console.log(hitungPajak(80000));
+console.log(hitungTotal(80000, 8800));
+
+// Hasil: ["Kopi", "Roti", "Susu"] true "Susu", 80000, 8800, 88800.
+// Tujuh kesalahan dan perbaikannya: unshift diganti push; slice diganti splice;
+// indexOf diganti includes; indeks length diganti length - 1; return ditambahkan
+// ke hitungDiskon; return ditambahkan ke hitungPajak; hitungTotal didefinisikan
+// sebelum dipanggil.
+// Kesalahan urutan hitungTotal menimbulkan ReferenceError karena const belum siap.
+// Kesalahan lain tidak langsung menimbulkan error, tetapi mengubah daftar atau hasil
+// menjadi tidak sesuai, termasuk menghasilkan undefined akibat return yang hilang.
+// Kedua function tidak mengembalikan ekspresi hitungannya: function biasa maupun
+// arrow function dengan kurung kurawal perlu return yang ditulis secara eksplisit.
+
