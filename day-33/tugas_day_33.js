@@ -87,3 +87,67 @@ for (let huruf of "Kopi") {
 // for...in array memberi key/indeks, bukan isi; for...of membaca nilai iterable.
 // Object biasa dapat disisir dengan for...in, tetapi tidak menyediakan iterator untuk for...of.
 // for (let x of kopi) { console.log(x); }
+
+// ============================
+// LANGKAH 2: PERBAIKI 7 ERROR
+// ============================
+
+const warung = {
+  nama: "Warung Senja",
+  saldoKas: 100000,
+
+  // FIX: 1. saldoKas adalah property object, jadi perubahan harus memakai this.
+  tambahKas(jumlah) {
+    this.saldoKas += jumlah;
+  },
+
+  // FIX: 2. return membuat pemanggil menerima saldo yang sudah dikurangi.
+  ambilKas(jumlah) {
+    this.saldoKas -= jumlah;
+    return this.saldoKas;
+  },
+};
+
+warung.tambahKas(50000);
+console.log(warung.saldoKas);
+console.log(warung.ambilKas(30000));
+
+// FIX: 3. bracket notation diperlukan karena nama property mengandung tanda hubung.
+const kontak = { "no-wa": "08123" };
+console.log(kontak["no-wa"]);
+
+// FIX: 4. delete menghapus property, bukan mempertahankan property bernilai undefined.
+const akun = { nama: "Rina", kataSandi: "abc123" };
+delete akun.kataSandi;
+console.log(akun);
+
+// FIX: 5. for...of membaca setiap nilai array.
+const menu = ["Kopi", "Teh", "Roti"];
+for (let item of menu) {
+  console.log(item);
+}
+
+// FIX: 6. for...in membaca key milik object.
+const info = { nama: "Warung Senja", kota: "Yogyakarta" };
+for (let kolom in info) {
+  console.log(kolom + ": " + info[kolom]);
+}
+
+// FIX: 7. nama method yang benar adalah Object.keys.
+console.log(Object.keys(info));
+
+// Tujuh kesalahan: tambahKas memakai saldoKas tanpa this; ambilKas tidak return;
+// kontak.no-wa dibaca sebagai operasi minus dan perlu kontak["no-wa"]; assignment
+// undefined tidak menghapus kataSandi dan harus diganti delete; for...in array
+// mencetak indeks sehingga harus for...of; for...of object bukan iterasi key
+// sehingga harus for...in; Object.key salah nama dan harus Object.keys.
+// Error console terjadi pada kontak.no-wa (ReferenceError pada wa) dan for...of info
+// (TypeError: info is not iterable); selebihnya kode bisa berjalan tetapi hasilnya salah.
+// Menetapkan akun.kataSandi = undefined tetap mempertahankan key, sehingga
+// "kataSandi" in akun bernilai true; setelah delete, hasilnya false.
+const akunDenganNilaiUndefined = { nama: "Rina", kataSandi: undefined };
+console.log("kataSandi masih ada setelah diberi undefined:", "kataSandi" in akunDenganNilaiUndefined);
+delete akunDenganNilaiUndefined.kataSandi;
+console.log("kataSandi masih ada setelah delete:", "kataSandi" in akunDenganNilaiUndefined);
+
+
