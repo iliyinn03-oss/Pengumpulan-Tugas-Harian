@@ -128,3 +128,127 @@ console.log(hitungTotal(80000, 8800));
 // Kedua function tidak mengembalikan ekspresi hitungannya: function biasa maupun
 // arrow function dengan kurung kurawal perlu return yang ditulis secara eksplisit.
 
+// ============================
+// LANGKAH 3: BIKIN KASIR SENDIRI
+// ============================
+
+const kasirNamaMenu = ["Kopi Susu", "Es Teh", "Roti Bakar", "Nasi Goreng", "Jus Jeruk"];
+const kasirHargaMenu = [18000, 7500, 15000, 22000, 12000];
+let kasirKeranjang = [];
+
+// Buktikan push mengubah array aslinya dengan melihat isi sebelum dan sesudah.
+console.log("Keranjang sebelum push:", kasirKeranjang);
+kasirKeranjang.push("Kopi Susu", "Es Teh", "Roti Bakar", "Nasi Goreng");
+console.log("Keranjang sesudah push:", kasirKeranjang);
+
+// unshift menambahkan item prioritas di depan, pop membatalkan item terakhir,
+// dan splice mengganti satu item pada indeks 2.
+kasirKeranjang.unshift("Jus Jeruk");
+kasirKeranjang.pop();
+kasirKeranjang.splice(2, 1, "Nasi Goreng");
+
+console.log("Ada Kopi Susu di keranjang:", kasirKeranjang.includes("Kopi Susu"));
+const kasirPaketCepat = kasirKeranjang.slice(0, 3);
+console.log("Paket cepat:", kasirPaketCepat);
+
+// Pemanggilan sebelum deklarasi function declaration tetap bisa dijalankan.
+console.log("Uji deklarasi function sebelum definisi:", kasirCariHarga("Kopi Susu"));
+
+// Jika baris ini diaktifkan sebelum deklarasi kasirHitungSubtotal di bawah,
+// hasilnya ReferenceError: Cannot access 'kasirHitungSubtotal' before initialization.
+// console.log(kasirHitungSubtotal());
+
+function kasirCariHarga(namaMenu) {
+  const kasirIndeksMenu = kasirNamaMenu.indexOf(namaMenu);
+  if (kasirIndeksMenu === -1) {
+    return 0;
+  }
+  return kasirHargaMenu[kasirIndeksMenu];
+}
+
+const kasirHitungSubtotal = () => {
+  let kasirSubtotal = 0;
+  for (let kasirIndeksItem = 0; kasirIndeksItem < kasirKeranjang.length; kasirIndeksItem++) {
+    kasirSubtotal += kasirCariHarga(kasirKeranjang[kasirIndeksItem]);
+  }
+  return kasirSubtotal;
+};
+
+const kasirHitungDiskon = (subtotal) => {
+  if (subtotal >= 100000) {
+    return subtotal * 0.15;
+  } else if (subtotal >= 50000) {
+    return subtotal * 0.10;
+  } else if (subtotal >= 25000) {
+    return subtotal * 0.05;
+  } else {
+    return 0;
+  }
+};
+
+const kasirHitungPajak = (nilai, tarif = 0.11) => nilai * tarif;
+
+function kasirCetakStruk(subtotal, diskon, pajak) {
+  const kasirTotalAkhir = subtotal - diskon + pajak;
+  console.log("\n===== STRUK WARUNG =====");
+  for (let kasirIndeksItem = 0; kasirIndeksItem < kasirKeranjang.length; kasirIndeksItem++) {
+    console.log(`${kasirIndeksItem + 1}. ${kasirKeranjang[kasirIndeksItem]}`);
+  }
+  console.log(`Subtotal: Rp${subtotal}`);
+  console.log(`Diskon  : Rp${diskon}`);
+  console.log(`Pajak   : Rp${pajak}`);
+  console.log(`Total   : Rp${kasirTotalAkhir}`);
+  console.log("========================");
+}
+
+// Skenario 1 memakai keranjang hasil push, unshift, pop, dan splice di atas.
+let kasirSubtotal = kasirHitungSubtotal();
+let kasirDiskon = kasirHitungDiskon(kasirSubtotal);
+let kasirPajak = kasirHitungPajak(kasirSubtotal - kasirDiskon);
+kasirCetakStruk(kasirSubtotal, kasirDiskon, kasirPajak);
+// Skenario 1: ["Jus Jeruk", "Kopi Susu", "Nasi Goreng", "Roti Bakar"]
+// Hasil: Subtotal 67000, Diskon 6700 (10%), Pajak 6633, Total 66933.
+
+// Skenario 2 mengganti isi keranjang agar memperoleh tingkat diskon yang berbeda.
+kasirKeranjang = [];
+kasirKeranjang.push(
+  "Nasi Goreng",
+  "Nasi Goreng",
+  "Nasi Goreng",
+  "Kopi Susu",
+  "Roti Bakar",
+  "Jus Jeruk",
+);
+kasirSubtotal = kasirHitungSubtotal();
+kasirDiskon = kasirHitungDiskon(kasirSubtotal);
+kasirPajak = kasirHitungPajak(kasirSubtotal - kasirDiskon);
+kasirCetakStruk(kasirSubtotal, kasirDiskon, kasirPajak);
+// Skenario 2: ["Nasi Goreng", "Nasi Goreng", "Nasi Goreng", "Kopi Susu", "Roti Bakar", "Jus Jeruk"]
+// Hasil: Subtotal 111000, Diskon 16650 (15%), Pajak 10378.5, Total 104728.5.
+
+// splice mengganti item di keranjang (kasirKeranjang.splice(2, 1, "Nasi Goreng"))
+// dan mengubah array aslinya; slice(0, 3) mengambil tiga item ke array baru.
+// kasirCariHarga memakai return supaya pemanggil mendapat angka; jika hanya mencetak,
+// kasirHitungSubtotal akan menambahkan undefined dan subtotal tidak terhitung dengan benar.
+// Contoh parameter adalah namaMenu pada kasirCariHarga; argumennya "Kopi Susu"
+// saat function dipanggil. Parameter adalah nama penampung, sedangkan argumen adalah nilai kiriman.
+// kasirHitungPajak menerima satu argumen karena tarif default-nya 0.11; argumen kedua
+// dapat diberikan untuk memakai tarif pajak yang berbeda.
+// Function declaration kasirCariHarga dapat dipanggil sebelum definisinya karena hoisting.
+// KasirHitungSubtotal berupa const function expression belum tersedia sebelum baris deklarasinya;
+// percobaan yang dikomentari akan menghasilkan ReferenceError seperti tertulis di atas.
+
+// BONUS: batalkan item jika ditemukan dan laporkan apakah penghapusan berhasil.
+function kasirBatalkanItem(namaMenu) {
+  const kasirIndeksItem = kasirKeranjang.indexOf(namaMenu);
+  if (kasirIndeksItem === -1) {
+    return false;
+  }
+  kasirKeranjang.splice(kasirIndeksItem, 1);
+  return true;
+}
+
+// Hasil bonus: kasirBatalkanItem("Nasi Goreng") menghasilkan true;
+// kasirBatalkanItem("Bakso") menghasilkan false.
+console.log("Bonus, batalkan Nasi Goreng:", kasirBatalkanItem("Nasi Goreng"));
+console.log("Bonus, batalkan Bakso:", kasirBatalkanItem("Bakso"));
