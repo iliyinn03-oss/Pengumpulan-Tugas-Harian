@@ -99,3 +99,84 @@ console.log(penghitungA());
 
 // Pertanyaan Potongan C:
 // `penghitungA` terus bertambah karena closure menjaga variabel `hitungan` di lingkungan lexical fungsi `buatPenghitung`. Setiap kali `penghitungA` dipanggil, ia memakai variabel yang sama dari closure itu. `penghitungB` mulai dari 1 lagi karena fungsi `buatPenghitung()` dipanggil lagi dan membuat closure baru dengan variabel `hitungan` yang baru.
+
+
+// -----------------------------------------------------
+// Langkah 2: Perbaiki 8 Kesalahan
+// -----------------------------------------------------
+
+// FIX: variabel `pesanStok` dibuat di luar blok agar bisa dibaca saat console.log.
+let pesanStok = "";
+const stok = 10;
+if (stok > 5) {
+  pesanStok = "Stok aman";
+}
+console.log(pesanStok);
+
+// FIX: hasil dari fungsi dipanggil dan dicetak agar variabel lokal `potongan` tidak ikut dipakai di luar fungsi.
+function hitungPotongan(harga) {
+  const potongan = harga * 0.1;
+  return harga - potongan;
+}
+const hasilPotongan = hitungPotongan(50000);
+console.log(hasilPotongan);
+
+// FIX: function expression didefinisikan sebelum dipanggil, agar tidak terjadi TDZ.
+const sambutan = function () {
+  return "Selamat datang di Kedai Senja";
+};
+console.log(sambutan());
+
+// FIX: `kota` dideklarasi sebelum dipanggil agar nilai tersedia dan tidak error.
+let kota = "Yogyakarta";
+console.log(kota);
+
+// FIX: `total` diubah dengan `let` agar blok tidak mengganti variabel di luar scope.
+let total = 100000;
+if (true) {
+  const totalBlok = 90000;
+  console.log(totalBlok);
+}
+console.log(total);
+
+// FIX: `saldoKas` di luar fungsi tidak di-shadowing dengan `let` di dalam fungsi, supaya saldo global berubah.
+let saldoKas = 100000;
+function tambahKas(jumlah) {
+  saldoKas += jumlah;
+}
+tambahKas(50000);
+console.log(saldoKas);
+
+// FIX: `nomor` dibuat di luar fungsi yang dikembalikan agar nilai bertambah dari satu pemanggilan ke pemanggilan berikutnya.
+function buatAntrean() {
+  let nomor = 0;
+  return function () {
+    nomor++;
+    return nomor;
+  };
+}
+const ambilNomor = buatAntrean();
+console.log(ambilNomor(), ambilNomor(), ambilNomor());
+
+// FIX: `cekSaldo` mengembalikan variabel closure `saldo`, bukan `this.saldo` yang tidak ada.
+function buatDompet(saldoAwal) {
+  let saldo = saldoAwal;
+  return {
+    belanja(jumlah) {
+      saldo -= jumlah;
+    },
+    cekSaldo() {
+      return saldo;
+    },
+  };
+}
+const dompet = buatDompet(100000);
+dompet.belanja(30000);
+console.log(dompet.cekSaldo());
+
+// Pertanyaan Langkah 2:
+// 1. Kesalahan 1: `pesanStok` dibuat di dalam blok, jadi tidak bisa dibaca di luar; solusinya deklarasikan di luar blok. 2. Kesalahan 2: hasil fungsi tidak dipakai dan variabel lokal `potongan` tidak bisa diakses luar fungsi; solusinya simpan hasil fungsi lalu cetak. 3. Kesalahan 3: fungsi expression dipanggil sebelum didefinisikan; solusinya deklarasikan `const sambutan` sebelum `console.log`. 4. Kesalahan 4: `kota` dipanggil sebelum dideklarasi; solusinya deklarasikan variabel dahulu. 5. Kesalahan 5: `var total` di dalam blok mengganti nilai variabel luar; solusinya gunakan scope blok yang terpisah. 6. Kesalahan 6: `let saldoKas = 0` di dalam fungsi menutupi saldo luar; solusinya gunakan saldo luar atau kembalikan nilai. 7. Kesalahan 7: `nomor` dibuat ulang setiap pemanggilan fungsi; solusinya deklarasikan di luar fungsi closure. 8. Kesalahan 8: `this.saldo` tidak ada di object; solusinya gunakan closure `saldo`.
+// Kesalahan yang menyebabkan error: `pesanStok`, `sambutan`, `kota`, dan `lokasi`/`salam` kalau diubah jadi kode asli. Kesalahan yang tidak error tetapi hasil salah: `potongan`, `total`, `saldoKas`, `nomor`, `this.saldo` karena semua itu tidak error, tetapi menghasilkan output yang salah.
+// `let saldoKas = 0` di dalam `tambahKas` membuat saldo di luar tidak berubah karena variabel itu adalah variabel baru yang hanya ada di scope fungsi. Istilahnya adalah shadowing atau lexical scoping.
+// `this.saldo` di dalam `cekSaldo` menghasilkan `undefined` karena `this` merujuk ke object yang dipanggil, tetapi property `saldo` tidak pernah dibuat sebagai properti object; `saldo` hanya ada di closure di fungsi `buatDompet`, bukan di `this`.
+
