@@ -180,3 +180,121 @@ console.log(dompet.cekSaldo());
 // `let saldoKas = 0` di dalam `tambahKas` membuat saldo di luar tidak berubah karena variabel itu adalah variabel baru yang hanya ada di scope fungsi. Istilahnya adalah shadowing atau lexical scoping.
 // `this.saldo` di dalam `cekSaldo` menghasilkan `undefined` karena `this` merujuk ke object yang dipanggil, tetapi property `saldo` tidak pernah dibuat sebagai properti object; `saldo` hanya ada di closure di fungsi `buatDompet`, bukan di `this`.
 
+// ---------------------------
+// Langkah 3: Bikin Kasir Sendiri
+// ---------------------------
+
+const NAMA_WARUNG = "kedai senja";
+const TARIF_PAJAK = 0.11;
+
+cetakJudul();
+
+function cetakJudul() {
+  console.log(NAMA_WARUNG.toUpperCase());
+}
+
+function buatKasir(namaKasir, modalAwal) {
+  let saldoKas = modalAwal;
+  let jumlahTransaksi = 0;
+  const riwayat = [];
+
+  return {
+    catatPenjualan(namaMenu, harga, jumlah) {
+      const subtotal = harga * jumlah;
+      const pajak = subtotal * TARIF_PAJAK;
+      const total = subtotal + pajak;
+
+      saldoKas += total;
+      jumlahTransaksi += 1;
+      riwayat.push({ namaMenu, jumlah, total });
+      return total;
+    },
+    ambilKas(jumlah) {
+      if (jumlah > saldoKas) {
+        return false;
+      }
+
+      saldoKas -= jumlah;
+      return true;
+    },
+    cekSaldo() {
+      return saldoKas;
+    },
+    lihatRiwayat() {
+      return riwayat.slice();
+    },
+    ringkasan() {
+      console.log(`${namaKasir} | Transaksi: ${jumlahTransaksi} | Saldo: ${saldoKas}`);
+    },
+  };
+}
+
+const kasirPagi = buatKasir("Rina", 100000);
+const kasirMalam = buatKasir("Dodi", 50000);
+
+kasirPagi.catatPenjualan("Nasi Goreng", 20000, 2);
+kasirPagi.catatPenjualan("Es Teh", 5000, 3);
+kasirPagi.catatPenjualan("Kopi", 12000, 2);
+
+kasirMalam.catatPenjualan("Mie Ayam", 18000, 2);
+kasirMalam.catatPenjualan("Bakso", 25000, 1);
+
+console.log(kasirPagi.ambilKas(20000));
+console.log(kasirPagi.ambilKas(999999));
+
+kasirPagi.ringkasan();
+kasirMalam.ringkasan();
+
+// Buktikan data privat: `kasirPagi.saldoKas` tidak muncul karena `saldoKas` ada di closure dan bukan property object.
+console.log(kasirPagi.saldoKas);
+kasirPagi.saldoKas = 999999;
+console.log(kasirPagi.cekSaldo());
+
+// Buktikan salinan: `lihatRiwayat()` mengembalikan salinan array agar push pada salinan tidak memengaruhi riwayat asli.
+const riwayatPagi = kasirPagi.lihatRiwayat();
+riwayatPagi.push({ namaMenu: "Bonus", jumlah: 1, total: 0 });
+console.log(kasirPagi.lihatRiwayat().length);
+
+function buatPenghitungDiskon(persen) {
+  return (harga) => harga * (1 - persen / 100);
+}
+
+const diskon10 = buatPenghitungDiskon(10);
+const diskon25 = buatPenghitungDiskon(25);
+console.log(diskon10(80000));
+console.log(diskon25(80000));
+
+// Shadowing: variabel global dan variabel lokal dalam fungsi sama nama, tetapi kedua scope berbeda.
+let namaToko = "Warung Utama";
+function contohShadowing() {
+  let namaToko = "Warung Dalam";
+  console.log("Dalam function:", namaToko);
+}
+console.log("Global:", namaToko);
+contohShadowing();
+
+// Pertanyaan Langkah 3:
+// 1. `kasirPagi.saldoKas` menghasilkan `undefined` karena `saldoKas` bukan property object; itu adalah variabel privat di closure yang hanya bisa diakses melalui method, misalnya `cekSaldo()`. Hubungannya dengan closure adalah fungsi method menutup variabel `saldoKas` dari lingkungan `buatKasir` dan menggunakannya meskipun `buatKasir` sudah selesai berjalan.
+// 2. `kasirPagi` dan `kasirMalam` terpisah karena setiap pemanggilan `buatKasir()` membuat environment baru dengan variabel `saldoKas`, `jumlahTransaksi`, dan `riwayat` yang berbeda. Jadi closure tiap kasir menyimpan data sendiri-sendiri.
+// 3. Setelah `buatKasir` selesai dijalankan, variabel yang masih diingat adalah `saldoKas`, `jumlahTransaksi`, dan `riwayat` karena method-object yang dikembalikan masih menutup (closure) lingkungan lexical itu. Karena masih ada referensi dari method ke lingkungan tersebut, variabel itu tidak hilang.
+// 4. `TARIF_PAJAK` bisa dipakai di dalam method karena JavaScript mencari variabel dari scope luar ketika fungsi dibuat. Mekanismenya disebut lexical scoping atau closure.
+// 5. `cetakJudul()` bisa dipanggil sebelum didefinisikan karena function declaration di-hoist ke awal. Jika dibuat dengan `const` dan dipanggil sebelum inisialisasi, akan muncul `ReferenceError` karena temporal dead zone. Contoh: `const cetakJudul = () => ...;` lalu `cetakJudul();` sebelum deklarasi -> error.
+// 6. `persen` tidak dikirim lagi saat `diskon10(80000)` dipanggil karena `diskon10` sudah menutup nilai `persen` dari saat `buatPenghitungDiskon(10)` dipanggil. Inilah fungsi closure: ia "mengingat" nilai dari lingkungan luar.
+
+// Bonus: Tebak hasil perulangan `let` dan `var`
+// Tebakan: for let => 0 1 2; for var => 3 3 3
+const fungsiLet = [];
+for (let i = 0; i < 3; i++) {
+  fungsiLet.push(() => i);
+}
+console.log(fungsiLet[0](), fungsiLet[1](), fungsiLet[2]());
+
+const fungsiVar = [];
+for (var j = 0; j < 3; j++) {
+  fungsiVar.push(() => j);
+}
+console.log(fungsiVar[0](), fungsiVar[1](), fungsiVar[2]());
+
+// Penjelasan bonus:
+// `let` membuat binding baru di setiap iterasi, jadi tiap fungsi menangkap nilai `i` yang berbeda. `var` hanya punya satu binding untuk seluruh loop, sehingga semua fungsi menangkap nilai akhir yang sama, yaitu 3, saat fungsi dipanggil setelah loop selesai.
+
